@@ -17,10 +17,14 @@ namespace PragueParking2
                 bool loop = true;
                 do
                 {
+                    Console.Clear();
                     CP.PrintCarPark();
-                    PrintLine();
-                    Console.Write("1. Park\t2. Retrive\t3. Move\t4. Search\t0. Quit\n");
-                    PrintLine();
+                    Console.WriteLine();
+                    //TODO move to Menu class
+                    PrintLineForMenu();
+                    Console.WriteLine("{0,-10}{1,-15}{2,-15}{3,-15}{4,-10}", "1. Park", "2. Retrive", "3. Move", "4. Search", "0. Close application");
+                    PrintLineForMenu();
+                    Console.Write("Choice: ");
                     bool inputOK = int.TryParse(Console.ReadLine(), out int choice);
                     if (inputOK)
                     {
@@ -39,7 +43,7 @@ namespace PragueParking2
                                 CP.MoveVehicle();
                                 break;
                             case 4:
-                                //CP.SearchVehicle();
+                                CP.SearchVehicle(out int? space);
                                 break;
                             default:
                                 break;
@@ -52,13 +56,13 @@ namespace PragueParking2
             {
                 Console.WriteLine("Something went very wrong. Restart application.");
             }
-        void PrintLine()
-        {
-            for (int i = 0; i < Console.WindowWidth; i++)
+            void PrintLineForMenu()     //TODO move to menu class
             {
-                Console.Write("-");
+                for (int i = 0; i < Console.WindowWidth; i++)
+                {
+                    Console.Write("─");
+                }
             }
-        }
         }
     }
 }
