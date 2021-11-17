@@ -1,8 +1,9 @@
 ﻿namespace PragueParking2
 {
-    enum VehicleSize
+    enum Sizes
         {
-            ParkingSpace = 4, //TODO move to settings file
+            ParkingSpaces = 100,
+            ParkingSpaceSize = 4,
             MC = 2,
             CAR = 4
         }

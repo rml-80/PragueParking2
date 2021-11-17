@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PragueParking2.Files;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,13 +11,13 @@ namespace PragueParking2
     {
         public CAR(string licensePlate) : base(licensePlate)
         {
-            Size = (int)VehicleSize.CAR;
+            Size = Config.CarSize;
             type = "CAR";
         }
 
         public CAR(Vehicle vehicle) : base(vehicle)
         {
-            Size = (int)VehicleSize.CAR;
+            Size = Config.CarSize;
             type = "CAR";
         }
     }

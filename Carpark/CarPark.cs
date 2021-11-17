@@ -1,5 +1,8 @@
-﻿using System;
+﻿using PragueParking2.Files;
+using PragueParking2.Menus;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace PragueParking2
@@ -7,13 +10,16 @@ namespace PragueParking2
     class CarPark
     {
         static FileContext FC = new();
-        private int Size { get; } = 100; //TODO move to config file
+        public int Size { get; set; } = Config.NumberOfSpaces;
         public static List<ParkingSpace> parkingSpaces = new();
         public CarPark()
         {
-            for (int i = 0; i < Size; i++)
+            if (!parkingSpaces.Count.Equals(Size))
             {
-                parkingSpaces.Add(new ParkingSpace(i + 1, (int)VehicleSize.ParkingSpace));
+                for (int i = 0; i < Size; i++)
+                {
+                    parkingSpaces.Add(new ParkingSpace(i + 1, Config.SpaceSize));
+                }
             }
         }
         public void PrintCarPark()
@@ -61,39 +67,58 @@ namespace PragueParking2
                 }
             }
         }
-
-        public Vehicle CreateNewVehicle()   //TODO needs licensplate
+        public void SubMenu()
         {
-            while (true)
+            for (int i = 0; i < Config.VehicleTypes.Length; i++)
             {
-                Console.WriteLine("1. Car\t2. MC");
+                Console.Write($"{i + 1}. {Config.VehicleTypes[i]}\t");
+            }
+        }
+        public Vehicle CreateNewVehicle()
+        {
+            bool loop = true;
+            Vehicle vehicle = new();
+            while (loop)
+            {
+                SubMenu();
                 bool inputOk = int.TryParse(Console.ReadLine(), out int choice);
                 if (inputOk)
                 {
-                    Vehicle vehicle;
-                    Console.Write("Enter license plate: ");
-                    switch (choice)
+                    bool validNumberPlate;
+                    do
                     {
-                        case 1:
-                            return vehicle = new CAR(Console.ReadLine());
-                        case 2:
-                            return vehicle = new MC(Console.ReadLine());
-                        default:
-                            return null;
-                    }
+                        string numberPlate = EnterNumberPlate();
+                        validNumberPlate = vehicle.ValidateLicensePlate(numberPlate);
+                        if (validNumberPlate)
+                        {
+                            switch (choice)
+                            {
+                                case 1:
+                                    vehicle = new CAR(numberPlate);
+                                    loop = false;
+                                    break;
+                                case 2:
+                                    vehicle = new MC(numberPlate);
+                                    loop = false;
+                                    break;
+                                default:
+                                    Console.WriteLine("Not a valid choice.");
+                                    break;
+                            }
+                        }
+                    } while (!validNumberPlate);
                 }
                 else
                 {
                     Console.WriteLine("Invalid input detected. Please try again.");
-                    return null;
-                } 
+                }
             }
+            ParkVehicle(vehicle, null);
+            return vehicle;
         }
         public int FindSpace(int size)
         {
             int? space = null;
-            //TODO find the first space with enough of available space
-
             for (int i = 0; i < parkingSpaces.Count; i++)
             {
                 if (parkingSpaces[i].AvailableSpace >= size)
@@ -103,16 +128,13 @@ namespace PragueParking2
             }
             return (int)space;
         }
-
-        public Vehicle SearchVehicle(out int? space)         //TODO needs licens plate, out int space
+        public Vehicle SearchVehicle(out int? space)
         {
-            //TODO search for a vehicle
             space = null;
             Vehicle vehicle = null;
             while (vehicle == null)
             {
-                Console.Write("Enter license plate: ");
-                string licensePlate = Console.ReadLine();
+                string licensePlate = EnterNumberPlate();
                 for (int i = 0; i < parkingSpaces.Count; i++)
                 {
                     if (parkingSpaces[i].ParkedVehicles != null)
@@ -132,123 +154,129 @@ namespace PragueParking2
             }
             return null;
         }
-
-        public bool ParkVehicle()           //TODO needs vehicle and space number
+        private static string EnterNumberPlate()
         {
-            //TODO park vehicle to the specified space number
-            //TODO check duplicate license plates
-            Vehicle vehicle = CreateNewVehicle();
+            Console.Write("Enter license plate: ");
+            string licensePlate = Console.ReadLine().ToUpper();
+            return licensePlate;
+        }
+        public bool ParkVehicle(Vehicle vehicle, int? space)
+        {
             if (vehicle != null)
             {
-                int space = FindSpace(vehicle.Size);
-                if (parkingSpaces[space].ParkedVehicles == null)
+                if (space == null)
                 {
-                    parkingSpaces[space].ParkedVehicles = new List<Vehicle>();
+                    space = FindSpace(vehicle.Size);
                 }
-                parkingSpaces[space].ParkedVehicles.Add(vehicle);
-                parkingSpaces[space].AvailableSpace -= vehicle.Size;
+                if (parkingSpaces[(int)space].ParkedVehicles == null)
+                {
+                    parkingSpaces[(int)space].ParkedVehicles = new List<Vehicle>();
+                }
+                parkingSpaces[(int)space].ParkedVehicles.Add(vehicle);
+                parkingSpaces[(int)space].AvailableSpace -= vehicle.Size;
                 FC.WriteSavedParkingSpaces();
+                PrintTicket(vehicle, (int)space);       //TODO if moving don't print ticket
                 return true;
             }
             else
             {
-                Console.WriteLine("Something went wrong...");
-                return false;
-            }
-
-        }
-
-        public bool RetriveVehicle()        //TODO needs vehicle, or license plate?
-        {
-            //TODO search for vehicle
-            //TODO retrive vehicle
-
-            Vehicle vehicle = SearchVehicle(out int? space);
-
-            if (vehicle != null)
-            {
-                parkingSpaces[(int)space].ParkedVehicles.Remove(vehicle);
-                parkingSpaces[(int)space].AvailableSpace += vehicle.Size;
-                if (parkingSpaces[(int)space].ParkedVehicles.Count == 0)
-                {
-                    parkingSpaces[(int)space].ParkedVehicles = null;
-                }
-                FC.WriteSavedParkingSpaces();
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("Something went wrong...");   //TODO move to own method WrongMsg
+                WrongMsg();
                 return false;
             }
         }
-
-        public bool MoveVehicle()           //TODO needs vehicle, or license plate, space and new space
+        public bool RetriveVehicle(Vehicle vehicle, int space)
         {
-            //TODO move specified vehicle from one space to another
+            vehicle.PrintVehicleInfo((int)space, vehicle);      //TODO if moving don't print info
+            parkingSpaces[(int)space].ParkedVehicles.Remove(vehicle);
+            parkingSpaces[(int)space].AvailableSpace += vehicle.Size;
+            if (parkingSpaces[(int)space].ParkedVehicles.Count == 0)
+            {
+                parkingSpaces[(int)space].ParkedVehicles = null;
+            }
+            FC.WriteSavedParkingSpaces();
+            return true;
+        }
+        public bool MovingVehicle()
+        {
             Vehicle vehicle = SearchVehicle(out int? space);
             if (vehicle != null)
             {
-                parkingSpaces[(int)space].ParkedVehicles.Remove(vehicle);
-                parkingSpaces[(int)space].AvailableSpace += vehicle.Size;
-                if (parkingSpaces[(int)space].ParkedVehicles.Count == 0)
+                Console.Write("Move to: ");
+                bool inputOK = int.TryParse(Console.ReadLine(), out int newSpace);
+                if (inputOK && newSpace < Size)
                 {
-                    parkingSpaces[(int)space].ParkedVehicles = null;
-                }
-                do
-                {
-                    Console.Write("Move to: ");
-                    bool inputOK = int.TryParse(Console.ReadLine(), out int newSpace);
-                    if (inputOK && newSpace < Size)
+                    if (parkingSpaces[newSpace].AvailableSpace >= vehicle.Size)
                     {
-                        if (parkingSpaces[newSpace].AvailableSpace >= vehicle.Size)
-                        {
-                            if (parkingSpaces[newSpace].ParkedVehicles == null)
-                            {
-                                parkingSpaces[newSpace].ParkedVehicles = new();
-                            }
-                            parkingSpaces[newSpace].ParkedVehicles.Add(vehicle);
-                            parkingSpaces[newSpace].AvailableSpace -= vehicle.Size;
-                            return true;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Space occupied.");
-                        }
+                        ParkVehicle(vehicle, newSpace);
+                        RetriveVehicle(vehicle, (int)space);
+                        return true;
                     }
                     else
                     {
-                        Console.WriteLine("Input type was wrong.");
+                        Console.WriteLine("Space occupied.");
                     }
-                } while (true);
-                return false;
+                }
+                else
+                {
+                    Console.WriteLine("Input type was wrong.");
+                }
             }
             else
             {
-                //TODO WrongMsg
+                WrongMsg();
                 return false;
             }
+            return true;
         }
+        public void PrintTicket(Vehicle vehicle, int spaceNumber)
+        {
+            Console.Clear();
+            Console.WriteLine($"Park vehical on space: {spaceNumber + 1}");
+            Console.SetCursorPosition(0, Console.WindowHeight / 2 - 5);
+            Menu.CenterTxt("Ticket");
+            Menu.CenterTxt($"You have parked a {vehicle.GetType().Name} at Prague Parking\n");
+            Menu.CenterTxt($"Number plate: {vehicle.LicensePlate}\n");
+            Menu.CenterTxt($"It's parked on space number: {spaceNumber + 1}");
+            Menu.CenterTxt($"Time parked: {vehicle.TimeParked:g}"); // using :g to not display seconds
+            Console.WriteLine();
+            Menu.CenterTxt("Press any key to print ticket to customer.");
+            Console.CursorVisible = false;
+            Console.ReadKey();
+            Console.CursorVisible = true;
+        }
+        public static TimeSpan CalculateDuration(DateTime dt)
+        {
+            return DateTime.Now - dt;
+        }
+        public static double CalculatePrice(Vehicle vehicle)
+        {
+            TimeSpan duration = CalculateDuration(vehicle.TimeParked);
+            TimeSpan time = duration.Subtract(TimeSpan.FromMinutes(10));
+            double price = 0;
+            FileContext FC = new();
+            price = FC.GetPrice(vehicle);
+            if (time.Minutes >= 0)
+            {
+                //TimeSpan addHour = new TimeSpan (1, 0, 0);
+                time = time.Add(TimeSpan.FromHours(1));
+            }
+            if (time.Days >= 1)
+            {
+                price = (time.Days * 24) * price;
 
-        public void PrintTicket()   //TODO needs vehicle and space number
-        {
-            //TODO print ticket to customer
-            throw new System.NotImplementedException();
+            }
+            price += time.Hours * price;
+            return price;
         }
-        public void PrintRecipe()   //TODO needs vehicle
+        public static TimeSpan ReturnDurationAndPrice(Vehicle vehicle, out double price)
         {
-            //TODO print recipe to customer
-            TimeSpan duration = CalculateDuration();
-            float price = CalculatePrice();
-            throw new System.NotImplementedException();
+            TimeSpan duration = CalculateDuration(vehicle.TimeParked);
+            price = CalculatePrice(vehicle);
+            return duration;
         }
-        public TimeSpan CalculateDuration() //TODO needs vehicle.TimeParked
+        void WrongMsg()
         {
-            throw new System.NotImplementedException();
-        }
-        public float CalculatePrice()       //TODO needs duration
-        {
-            throw new System.NotImplementedException();
+            Console.WriteLine("Something went wrong...");
         }
     }
 }

@@ -1,0 +1,10 @@
+{
+  "NumberOfSpaces": 100,
+  "SpaceSize": 4,
+  "CarSize": 4,
+  "MCSize": 2,
+  "VehicleTypes": [
+    "CAR",
+    "MC"
+  ]
+}
