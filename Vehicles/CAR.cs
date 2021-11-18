@@ -9,13 +9,7 @@ namespace PragueParking2
 {
     class CAR : Vehicle
     {
-        public CAR(string licensePlate) : base(licensePlate)
-        {
-            Size = Config.CarSize;
-            type = "CAR";
-        }
-
-        public CAR(Vehicle vehicle) : base(vehicle)
+        public CAR(string licensePlate, DateTime timeParked) : base(licensePlate, timeParked)
         {
             Size = Config.CarSize;
             type = "CAR";

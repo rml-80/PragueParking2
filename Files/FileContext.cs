@@ -10,16 +10,18 @@ namespace PragueParking2
 {
     public class FileContext
     {
-        //path to files
-        public string pathSavedParkingSpaces = @"../../../Files/SavedParkingSpaces.json";
-        string pathConfigFile = @"../../../Files/ConfigFile.json";
-        string pathPriceFile = @"../../../Files/PriceFile.txt";
+        //paths to files
+        const string pathSavedParkingSpaces = @"../../../Files/SavedParkingSpaces.json";
+        const string pathConfigFile = @"../../../Files/ConfigFile.json";
+        const string pathPriceFile = @"../../../Files/PriceFile.txt";
 
         public FileContext()
         {
             CheckFile();
         }
-        //check if files exist, if not create new ones
+        /// <summary>
+        /// check if files exist, if not create new ones
+        /// </summary>
         public void CheckFile()
         {
             // Check if filesexists, if not create them
@@ -34,25 +36,29 @@ namespace PragueParking2
             }
             if (!File.Exists(pathSavedParkingSpaces))
             {
-                //Create empty file for parking spaces, no need to save empty carpark.
-                File.Create(pathSavedParkingSpaces).Close();
-                CarPark CP = new();
-                WriteSavedParkingSpaces();
+                File.Create(pathSavedParkingSpaces).Close();    //Create file if missing
+                CarPark CP = new();                             //Create new Car park
+                WriteSavedParkingSpaces();                      //Save car park
             }
             if (!File.Exists(pathPriceFile))
             {
-                File.Create(pathPriceFile).Close();
-                CreatePriceList();
+                File.Create(pathPriceFile).Close();     //Create file if missing
+                CreatePriceList();                      //add standard values to file when created
             }
         }
-
+        /// <summary>
+        /// Create a pricelist file if missing
+        /// Gets values from PriceLIst enum
+        /// </summary>
         private void CreatePriceList()
         {
             string[] temp = new string[] { $"MC:{((int)PriceList.MC)}",$"CAR:{(int)PriceList.Car}" };
             File.WriteAllLines(pathPriceFile, temp);
         }
-
-        //Create new config file
+        /// <summary>
+        /// Creates a new config file if missing
+        /// Gets values from VehicleSize enum
+        /// </summary>
         private void CreateConfigFile()
         {
             string[] vehicleTypes = { "CAR", "MC" };
@@ -60,13 +66,20 @@ namespace PragueParking2
             string jsonData = JsonConvert.SerializeObject(config);
             File.WriteAllText(pathConfigFile, jsonData);
         }
-        //save parking spaces to json file
+        /// <summary>
+        /// Save parking spaces to json file
+        /// </summary>
         public void WriteSavedParkingSpaces()
         {
             string parkingSpaces = JsonConvert.SerializeObject(CarPark.parkingSpaces);
             File.WriteAllText(pathSavedParkingSpaces, parkingSpaces);
         }
-        //read saved parking spaces
+        /// <summary>
+        /// Reads saved parking spaces from json file
+        /// </summary>
+        /// <returns>
+        /// bool
+        /// </returns>
         public bool ReadSavedParkingSpaces()
         {
             try
@@ -86,14 +99,14 @@ namespace PragueParking2
                             //create new objects of right type
                             if (tempJsonList[i].ParkedVehicles[j].type == "CAR")
                             {
-                                CAR car = new(tempJsonList[i].ParkedVehicles[j]);
+                                CAR car = new(tempJsonList[i].ParkedVehicles[j].LicensePlate, tempJsonList[i].ParkedVehicles[j].TimeParked);
 
                                 CarPark.parkingSpaces[i].ParkedVehicles.Add(car);
                                 CarPark.parkingSpaces[i].AvailableSpace -= car.Size;
                             }
                             else if (tempJsonList[i].ParkedVehicles[j].type == "MC")
                             {
-                                MC mc = new(tempJsonList[i].ParkedVehicles[j]);
+                                MC mc = new(tempJsonList[i].ParkedVehicles[j].LicensePlate, tempJsonList[i].ParkedVehicles[j].TimeParked);
                                 CarPark.parkingSpaces[i].ParkedVehicles.Add(mc);
                                 CarPark.parkingSpaces[i].AvailableSpace -= mc.Size;
                             }
@@ -105,21 +118,29 @@ namespace PragueParking2
             catch (Exception e)
             {
                 Console.WriteLine("Something went wrong." + e.Message);
+                return false;
             }
             return true;
         }
-        //read config file
+        /// <summary>
+        /// Reads config file on startup
+        /// </summary>
         public void ReadConfigFileJson()
         {
             string jsonData = File.ReadAllText(pathConfigFile);
             _ = JsonConvert.DeserializeObject<Config>(jsonData);
         }
-        //read price file, wanted a simple file format for price, so that the users can't change config
-        //TODO needs to be reloadable, need to get prices in a better way
-        public double GetPrice(Vehicle vehicleType)
+        /// <summary>
+        /// Reads price file, wanted a simple file format for price, so that the users can't change config
+        /// reads the file every time GetPrice is called. No need to reload.</summary>
+        /// <param name="vehicleType"></param>
+        /// <returns>
+        /// double price
+        /// </returns>
+        public double GetPrice(string vehicleType)
         {
             string[] temp = File.ReadAllLines(pathPriceFile);
-            string priceString = (vehicleType.GetType() == typeof(CAR)) ? temp.FirstOrDefault(x => x.Contains("CAR")) : temp.FirstOrDefault(x => x.Contains("MC")) ;
+            string priceString = (vehicleType == "CAR") ? temp.FirstOrDefault(x => x.Contains("CAR")) : temp.FirstOrDefault(x => x.Contains("MC")) ;
             string[] priceArray = priceString.Split(":");
             double price = Convert.ToDouble( priceArray[1]);
             return price;

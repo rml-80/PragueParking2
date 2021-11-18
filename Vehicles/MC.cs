@@ -9,14 +9,9 @@ namespace PragueParking2
 {
     class MC : Vehicle
     {
-        public MC(string licensePlate) : base(licensePlate)
+        public MC(string licensePlate, DateTime timeParked) : base(licensePlate, timeParked)
         {
             Size = Config.MCSize;
-            type = "MC";
-        }
-        public MC(Vehicle vehicle) : base(vehicle)
-        {
-            Size = Config.CarSize;
             type = "MC";
         }
     }

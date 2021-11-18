@@ -8,7 +8,7 @@ namespace PragueParking2
     {
         static void Main(string[] args)
         {
-            FileContext FC = new();
+            FileContext FC = new();     //must run before Menu class, because it checks files amd creates if not exsist
             Menu menu = new();
             menu.MainMenu(FC);
         }

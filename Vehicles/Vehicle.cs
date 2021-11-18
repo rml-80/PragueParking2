@@ -14,32 +14,28 @@ namespace PragueParking2
         public int Size { get; set; }
         public DateTime TimeParked { get; set; }
         public string type { get; set; }
-        public Vehicle(string licensePlate)
+        public Vehicle(string licensePlate, DateTime timeParked)
         {
             LicensePlate = licensePlate;
-            TimeParked = DateTime.Now;
+            TimeParked = timeParked;
         }
-        public Vehicle(Vehicle vehicle)
-        {
-            LicensePlate = vehicle.LicensePlate;
-            TimeParked = vehicle.TimeParked;
-        }
-        public Vehicle()
-        { }
+        /// <summary>
+        /// Outputs information about vehicle, also used for recipes at the moment
+        /// </summary>
+        /// <param name="space">Which space the vehicle is parked</param>
+        /// <param name="vehicle">Which vehicle to print info about</param>
         public void PrintVehicleInfo(int space, Vehicle vehicle)
         {
-            TimeSpan duration = CarPark.ReturnDurationAndPrice(vehicle, out double price);
+            TimeSpan duration = CarPark.CalculateDuration(vehicle.TimeParked);
+            double price = CarPark.CalculatePrice(vehicle);
             Console.Clear();
             Console.SetCursorPosition(0, Console.WindowHeight / 2 - 8);
+            //TODO make a nicer output
             Menu.CenterTxt("Recipt\n");
-
             Menu.CenterTxt($"You had a {vehicle.GetType().Name} parked at Prague Parking\n");
-
             Menu.CenterTxt($"With plate number: {vehicle.LicensePlate}\n");
-
             Menu.CenterTxt($"It was parked: {vehicle.TimeParked:g}\n");
             Menu.CenterTxt($"It has been parked here for: {duration.Days} days {duration.Hours} hours and {duration.Minutes} minutes\n\n");
-
             Menu.CenterTxt("Cost: ");
             Menu.CenterTxt($"{price} CZK");
             Console.WriteLine();
@@ -47,17 +43,6 @@ namespace PragueParking2
             Console.CursorVisible = false;
             Console.ReadKey();
             Console.CursorVisible = true;
-        }
-        //validate license plate, more than 4 chars and not more than 10 chars and dosen't contain special chars
-        public bool ValidateLicensePlate(string numberPlate)
-        {
-            string pattern = "^[A-Z0-9]{4,10}$";
-            bool valid = (Regex.IsMatch(numberPlate, pattern)) ? true : false;
-            Console.SetCursorPosition(0, 28);
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine((valid == false) ? "Invalid number plate..." : ""); ;
-            Console.ResetColor();
-            return valid;
         }
     }
 }

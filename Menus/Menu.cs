@@ -9,6 +9,11 @@ namespace PragueParking2.Menus
 {
     class Menu
     {
+        /// <summary>
+        /// Main menu for the application
+        /// Returns here until application is closed
+        /// </summary>
+        /// <param name="FC"></param>
         public void MainMenu(FileContext FC)
         {
             CarPark CP = new();
@@ -51,7 +56,7 @@ namespace PragueParking2.Menus
                             ShowPrices(FC);
                             break;
                         case 9:
-                            OptionsMenu(CP);
+                            OptionsMenu(CP,FC);
                             break;
                         default:
                             break;
@@ -59,19 +64,36 @@ namespace PragueParking2.Menus
                 }
             } while (loop);
         }
-        //TODO WIP
+        /// <summary>
+        /// Output the prices to console
+        /// </summary>
+        /// <param name="FC"></param>
         private void ShowPrices(FileContext FC)
         {
+            Console.Clear();
+            Console.WriteLine($"Price list:");
+            Console.WriteLine("***********");
             foreach (var vehicleType in Config.VehicleTypes)
             {
-                FC.GetPrice(vehicleType);
+                double price = FC.GetPrice(vehicleType);
+                Console.WriteLine($"{vehicleType}:\t {price} CZK for each hour started. ");
             }
+            Console.WriteLine();
+            Console.WriteLine("First 10 minutes are free.");
+            Console.WriteLine("Happy parking!");
+            Console.WriteLine();
+            Console.WriteLine("Press any key to close");
+            Console.ReadKey();
         }
-
-        private void OptionsMenu(CarPark CP)
+        /// <summary>
+        /// Outputs option menu to console
+        /// </summary>
+        /// <param name="CP"></param>
+        /// <param name="FC"></param>
+        private void OptionsMenu(CarPark CP, FileContext FC)    //TODO is FC necessery parameter? Yes if to open in notepad
         {
             ClearRow(26);
-            Console.Write($"1. Reload pricefile\t2. Remove all vehicles");
+            Console.Write($"1. Remove all vehicles");
             ClearChoice();
             bool inputOK = int.TryParse(Console.ReadLine(), out int choice);
             if (inputOK)
@@ -79,7 +101,7 @@ namespace PragueParking2.Menus
                 switch (choice)
                 {
                     case 1:
-                        FileContext FC = new();
+                        FC.GetPrice("Car");     //TODO perhaps a method that opens the priceFile in notepad?
                         break;
                     case 2:
                         CP.RemoveAllVehicles();
@@ -89,7 +111,9 @@ namespace PragueParking2.Menus
                 }
             }
         }
-
+        /// <summary>
+        /// Outputs submenu (Car or bike) to console
+        /// </summary>
         public static void SubMenu()
         {
             for (int i = 0; i < Config.VehicleTypes.Length; i++)
@@ -98,14 +122,18 @@ namespace PragueParking2.Menus
             }
             ClearChoice();
         }
-
+        /// <summary>
+        /// Clears choice input
+        /// </summary>
         public static void ClearChoice()
         {
             Console.SetCursorPosition(8, 28);
             Console.Write("       ");
             Console.SetCursorPosition(8, 28);
         }
-
+        /// <summary>
+        /// Prints a line across the window
+        /// </summary>
         private void PrintLineForMenu()
         {
             for (int i = 0; i < Console.WindowWidth; i++)
@@ -113,6 +141,10 @@ namespace PragueParking2.Menus
                 Console.Write("─");
             }
         }
+        /// <summary>
+        /// Centers text on the console
+        /// </summary>
+        /// <param name="txt"></param>
         public static void CenterTxt(string txt)
         {
             int screenWidth = Console.WindowWidth;
@@ -120,15 +152,10 @@ namespace PragueParking2.Menus
             int spaces = (screenWidth / 2) + (txtWidth / 2);
             Console.WriteLine(txt.PadLeft(spaces));
         }
-        //public static void ClearMenu()
-        //{
-        //    Console.SetCursorPosition(0, 26);
-        //    for (int i = 0; i < Console.WindowWidth; i++)
-        //    {
-        //        Console.Write(" ");
-        //    }
-        //    Console.SetCursorPosition(0, 26);
-        //}
+        /// <summary>
+        /// Clears a row in console
+        /// </summary>
+        /// <param name="row"></param>
         public static void ClearRow(int row)
         {
             Console.SetCursorPosition(0, row);
@@ -137,17 +164,6 @@ namespace PragueParking2.Menus
                 Console.Write(" ");
             }
             Console.SetCursorPosition(0, row);
-
         }
-        //public static void ClearErrorMsg()
-        //{
-        //    Console.SetCursorPosition(0, 28);
-        //    for (int i = 0; i < Console.WindowWidth; i++)
-        //    {
-        //        Console.Write(" ");
-        //    }
-        //    Console.SetCursorPosition(0, 28);
-
-        //}
     }
 }
