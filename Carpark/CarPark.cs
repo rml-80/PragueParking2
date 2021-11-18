@@ -3,6 +3,7 @@ using PragueParking2.Menus;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace PragueParking2
@@ -20,9 +21,14 @@ namespace PragueParking2
         {
             if (!parkingSpaces.Count.Equals(Size))
             {
-                for (int i = 0; i < Size; i++)
+                int cols = 4;
+                for (int i = 0; i < Size/cols; i++)
                 {
-                    parkingSpaces.Add(new ParkingSpace(i + 1, Config.SpaceSize));
+                    int k = i + 1;
+                    for (int j = 0; j < cols; j++, k += 25)
+                    {
+                        parkingSpaces.Add(new ParkingSpace(k, Config.SpaceSize));
+                    }
                 }
             }
         }
@@ -40,10 +46,9 @@ namespace PragueParking2
                     Console.WriteLine();
                     space = 1;
                 }
-                //TODO can this be done in a better way?
                 if (parkingSpaces[i].ParkedVehicles == null)
                 {
-                    Console.Write(string.Format("{0,3} | ", i + 1));
+                    Console.Write(string.Format("{0,3} | ", parkingSpaces[i].SpaceNumber));
                     Console.ForegroundColor = EmptyColor;
                     Console.Write(string.Format("{0,-24}", "Empty"));
                     Console.ResetColor();
@@ -51,15 +56,15 @@ namespace PragueParking2
                 }
                 else if (parkingSpaces[i].ParkedVehicles[0].GetType() == typeof(CAR))
                 {
-                    Console.Write(string.Format("{0,3} | ", i + 1));
+                    Console.Write(string.Format("{0,3} | ", parkingSpaces[i].SpaceNumber));
                     Console.ForegroundColor = CarColor;
-                    Console.Write(string.Format("{0,-24}", parkingSpaces[i].ParkedVehicles[0].LicensePlate));
+                    Console.Write(string.Format("{0,-24}", parkingSpaces[i].ParkedVehicles[0].GetType().Name));
                     Console.ResetColor();
                     space++;
                 }
                 else if (parkingSpaces[i].ParkedVehicles.Count == 2)
                 {
-                    Console.Write(string.Format("{0,3} | ", i + 1));
+                    Console.Write(string.Format("{0,3} | ", parkingSpaces[i].SpaceNumber));
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.Write(string.Format("{0,-3} {1,-20}", parkingSpaces[i].ParkedVehicles[0].GetType().Name, parkingSpaces[i].ParkedVehicles[0].GetType().Name));
                     Console.ResetColor();
@@ -67,7 +72,7 @@ namespace PragueParking2
                 }
                 else
                 {
-                    Console.Write(string.Format("{0,3} | ", i + 1));
+                    Console.Write(string.Format("{0,3} | ", parkingSpaces[i].SpaceNumber));
                     Console.ForegroundColor = MCColor;
                     Console.Write(string.Format("{0,-24}", parkingSpaces[i].ParkedVehicles[0].GetType().Name));
                     Console.ResetColor();
@@ -122,12 +127,12 @@ namespace PragueParking2
                                 case 1:
                                     CAR car = new CAR(numberPlate, DateTime.Now);
                                     loop = false;
-                                    ParkVehicle(car, null);
+                                    ParkingVehicle(car, null);
                                     break;
                                 case 2:
                                     MC mc = new MC(numberPlate, DateTime.Now);
                                     loop = false;
-                                    ParkVehicle(mc, null);
+                                    ParkingVehicle(mc, null);
                                     break;
                                 default:
                                     Console.WriteLine("Not a valid choice.");
@@ -152,32 +157,31 @@ namespace PragueParking2
         /// <returns>
         /// int spacenumber
         /// </returns>
-        //TODO return SpaceNumber instead?
         public int FindSpace(int size)      //TODO check if mc stands alone
         {
-            int? space = null;
-            for (int i = 0; i < parkingSpaces.Count; i++)
+            for (int spaceNumber = 1; spaceNumber <= parkingSpaces.Count; spaceNumber++)
             {
-                if (parkingSpaces[i].AvailableSpace >= size)
+                int spaceIndex = GetIndex(spaceNumber);
+                if (parkingSpaces[spaceIndex].AvailableSpace >= size)
                 {
-                    return (int)(space = i);
+                    return spaceIndex;
                 }
             }
-            return (int)space;
+            return -1;
         }
         /// <summary>
         /// Search for a specific vehicle
         /// </summary>
-        /// <param name="space"> 
+        /// <param name="spaceNumber"> 
         /// returns space index
         /// </param>
         /// <returns>
         /// The vehicle that was saearch for
         /// </returns>
-        public Vehicle SearchVehicle(out int? space)
+        public Vehicle SearchVehicle(out int? spaceNumber)
         {
             Menu.ClearRow(28);
-            space = null;
+            spaceNumber = null;
             Vehicle vehicle = null;
             while (vehicle == null)
             {
@@ -190,7 +194,7 @@ namespace PragueParking2
                         {
                             if (parkingSpaces[i].ParkedVehicles[j].LicensePlate == licensePlate)
                             {
-                                space = i;
+                                spaceNumber = parkingSpaces[i].SpaceNumber;
                                 vehicle = parkingSpaces[i].ParkedVehicles[j];
                                 Menu.ClearRow(28);
                                 return vehicle;
@@ -227,26 +231,55 @@ namespace PragueParking2
         /// <returns>
         /// bool 
         /// </returns>
+        [Obsolete]
         public bool ParkVehicle(Vehicle vehicle, int? space)
         {
             bool moved = (space == null) ? false : true;
-            if (vehicle != null)
-            {
-                if (space == null)
-                {
-                    space = FindSpace(vehicle.Size);
-                }
-                if (parkingSpaces[(int)space].ParkedVehicles == null)
-                {
-                    parkingSpaces[(int)space].ParkedVehicles = new List<Vehicle>();
-                }
-                parkingSpaces[(int)space].ParkedVehicles.Add(vehicle);
-                parkingSpaces[(int)space].AvailableSpace -= vehicle.Size;
-                FC.WriteSavedParkingSpaces();
 
+            if (space == null)
+            {
+                space = FindSpace(vehicle.Size);
+            }
+            if (parkingSpaces[(int)space].ParkedVehicles == null)
+            {
+                parkingSpaces[(int)space].ParkedVehicles = new List<Vehicle>();
+            }
+            parkingSpaces[(int)space].ParkedVehicles.Add(vehicle);
+            parkingSpaces[(int)space].AvailableSpace -= vehicle.Size;
+            FC.WriteSavedParkingSpaces();
+            int idx = parkingSpaces.FindIndex(x => x.SpaceNumber == space);
+            if (!moved)
+            {
+                PrintTicket(vehicle, (int)space);
+            }
+            return true;
+        }
+        public bool ParkingVehicle(Vehicle vehicle, int? spaceNumber)
+        {
+            bool moved = (spaceNumber == null) ? false : true;
+            int? idx;
+            if (spaceNumber == null)
+            {
+                //Get the index of next empty space
+                idx = FindSpace(vehicle.Size);
+            }
+            else
+            {
+                //Get the index of spacenumber x
+                idx = GetIndex((int)spaceNumber); 
+            }
+            if (idx != -1)
+            {
+                if (parkingSpaces[(int)idx].ParkedVehicles == null)
+                {
+                    parkingSpaces[(int)idx].ParkedVehicles = new List<Vehicle>();
+                }
+                parkingSpaces[(int)idx].ParkedVehicles.Add(vehicle);
+                parkingSpaces[(int)idx].AvailableSpace -= vehicle.Size;
+                FC.WriteSavedParkingSpaces();
                 if (!moved)
                 {
-                    PrintTicket(vehicle, (int)space);
+                    PrintTicket(vehicle, parkingSpaces[(int)idx].SpaceNumber);
                 }
                 return true;
             }
@@ -267,15 +300,16 @@ namespace PragueParking2
         /// </returns>
         public bool RetriveVehicle(Vehicle vehicle, int space, bool moved = false)
         {
+            int idx = GetIndex(space);
             if (!moved)
             {
-                vehicle.PrintVehicleInfo((int)space, vehicle);
+                PrintRecipe(vehicle);
             }
-            parkingSpaces[(int)space].ParkedVehicles.Remove(vehicle);
-            parkingSpaces[(int)space].AvailableSpace += vehicle.Size;
-            if (parkingSpaces[(int)space].ParkedVehicles.Count == 0)
+            parkingSpaces[idx].ParkedVehicles.Remove(vehicle);
+            parkingSpaces[idx].AvailableSpace += vehicle.Size;
+            if (parkingSpaces[idx].ParkedVehicles.Count == 0)
             {
-                parkingSpaces[(int)space].ParkedVehicles = null;
+                parkingSpaces[idx].ParkedVehicles = null;
             }
             FC.WriteSavedParkingSpaces();
             return true;
@@ -299,18 +333,19 @@ namespace PragueParking2
 
                     Console.Write("Move to: ");
                     bool inputOK = int.TryParse(Console.ReadLine(), out int newSpace);
-                    if (inputOK && newSpace < Size)
+                    int idx = GetIndex(newSpace);
+                    if (inputOK && idx < Size)
                     {
-                        if (parkingSpaces[newSpace].AvailableSpace >= vehicle.Size)
+                        if (parkingSpaces[idx].AvailableSpace >= vehicle.Size)
                         {
-                            ParkVehicle(vehicle, newSpace);
+                            ParkingVehicle(vehicle, newSpace);
                             RetriveVehicle(vehicle, (int)space, true);
                             return true;
                         }
                         else
                         {
                             Console.SetCursorPosition(0, 28);
-                            Console.ForegroundColor = WarningColor;     //TODO store somewhere else?
+                            Console.ForegroundColor = WarningColor;
                             Console.WriteLine("Space occupied.");
                             Console.ResetColor();
                         }
@@ -318,7 +353,7 @@ namespace PragueParking2
                     else
                     {
                         Console.SetCursorPosition(0, 28);
-                        Console.ForegroundColor = WarningColor;     //TODO store somewhere else?
+                        Console.ForegroundColor = WarningColor;
                         Console.WriteLine("Input type was wrong.");
                         Console.ResetColor();
                     }
@@ -331,22 +366,56 @@ namespace PragueParking2
             }
         }
         /// <summary>
+        /// Get index for a space number
+        /// </summary>
+        /// <param name="Space">Which space</param>
+        /// <returns>int index for space number</returns>
+        private static int GetIndex(int Space)
+        {
+            return parkingSpaces.FindIndex(s => s.SpaceNumber == Space);
+        }
+
+        /// <summary>
         /// Outputs ticket to console
         /// </summary>
         /// <param name="vehicle">Which vehicle</param>
         /// <param name="spaceNumber">Which space number</param>
-        public void PrintTicket(Vehicle vehicle, int spaceNumber)   //TODO in parameter should be spaceNumber
+        public void PrintTicket(Vehicle vehicle, int spaceNumber)
         {
             Console.Clear();
-            Console.WriteLine($"Park vehical on space: {spaceNumber + 1}");
+            Console.WriteLine($"Park vehical on space: {spaceNumber}");
             Console.SetCursorPosition(0, Console.WindowHeight / 2 - 5);
             Menu.CenterTxt("Ticket");
             Menu.CenterTxt($"You have parked a {vehicle.GetType().Name} at Prague Parking\n");
             Menu.CenterTxt($"Number plate: {vehicle.LicensePlate}\n");
-            Menu.CenterTxt($"It's parked on space number: {spaceNumber + 1}");
+            Menu.CenterTxt($"It's parked on space number: {spaceNumber}");
             Menu.CenterTxt($"Time parked: {vehicle.TimeParked:g}"); // using :g to not display seconds
             Console.WriteLine();
             Menu.CenterTxt("Press any key to print ticket to customer.");
+            Console.CursorVisible = false;
+            Console.ReadKey();
+            Console.CursorVisible = true;
+        }
+        /// <summary>
+        /// Print recipe to console
+        /// </summary>
+        /// <param name="vehicle">Which vehicle</param>
+        public void PrintRecipe(Vehicle vehicle)
+        {
+            TimeSpan duration = CarPark.CalculateDuration(vehicle.TimeParked);
+            double price = CarPark.CalculatePrice(vehicle);
+            Console.Clear();
+            Console.SetCursorPosition(0, Console.WindowHeight / 2 - 8);
+            //TODO make a nicer output
+            Menu.CenterTxt("Recipt\n");
+            Menu.CenterTxt($"You had a {vehicle.GetType().Name} parked at Prague Parking\n");
+            Menu.CenterTxt($"With plate number: {vehicle.LicensePlate}\n");
+            Menu.CenterTxt($"It was parked: {vehicle.TimeParked:g}\n");
+            Menu.CenterTxt($"It has been parked here for: {duration.Days} days {duration.Hours} hours and {duration.Minutes} minutes\n\n");
+            Menu.CenterTxt("Cost: ");
+            Menu.CenterTxt($"{price} CZK");
+            Console.WriteLine();
+            Menu.CenterTxt("Press any key to print recipt to customer...");
             Console.CursorVisible = false;
             Console.ReadKey();
             Console.CursorVisible = true;
@@ -406,6 +475,7 @@ namespace PragueParking2
         {
             foreach (var space in parkingSpaces)
             {
+                space.AvailableSpace = Config.SpaceSize;
                 space.ParkedVehicles = null;
             }
             FC.WriteSavedParkingSpaces();

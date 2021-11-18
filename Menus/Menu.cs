@@ -80,7 +80,6 @@ namespace PragueParking2.Menus
             }
             Console.WriteLine();
             Console.WriteLine("First 10 minutes are free.");
-            Console.WriteLine("Happy parking!");
             Console.WriteLine();
             Console.WriteLine("Press any key to close");
             Console.ReadKey();
@@ -88,12 +87,12 @@ namespace PragueParking2.Menus
         /// <summary>
         /// Outputs option menu to console
         /// </summary>
-        /// <param name="CP"></param>
-        /// <param name="FC"></param>
-        private void OptionsMenu(CarPark CP, FileContext FC)    //TODO is FC necessery parameter? Yes if to open in notepad
+        /// <param name="CP">instance of CarPark for access to methods</param>
+        /// <param name="FC">instance of FileContext for access to methods</param>
+        private void OptionsMenu(CarPark CP, FileContext FC)
         {
             ClearRow(26);
-            Console.Write($"1. Remove all vehicles");
+            Console.Write($"1. Change prices\t2. Remove all vehicles");
             ClearChoice();
             bool inputOK = int.TryParse(Console.ReadLine(), out int choice);
             if (inputOK)
@@ -101,7 +100,7 @@ namespace PragueParking2.Menus
                 switch (choice)
                 {
                     case 1:
-                        FC.GetPrice("Car");     //TODO perhaps a method that opens the priceFile in notepad?
+                        FC.OpenPriceFile();
                         break;
                     case 2:
                         CP.RemoveAllVehicles();

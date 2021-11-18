@@ -2,6 +2,7 @@
 using PragueParking2.Files;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -144,6 +145,13 @@ namespace PragueParking2
             string[] priceArray = priceString.Split(":");
             double price = Convert.ToDouble( priceArray[1]);
             return price;
+        }
+        /// <summary>
+        /// Opens notepad for editing prices
+        /// </summary>
+        public void OpenPriceFile()
+        {
+            Process.Start("notepad.exe", pathPriceFile);
         }
     }
 }

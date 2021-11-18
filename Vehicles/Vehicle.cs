@@ -28,21 +28,8 @@ namespace PragueParking2
         {
             TimeSpan duration = CarPark.CalculateDuration(vehicle.TimeParked);
             double price = CarPark.CalculatePrice(vehicle);
-            Console.Clear();
-            Console.SetCursorPosition(0, Console.WindowHeight / 2 - 8);
-            //TODO make a nicer output
-            Menu.CenterTxt("Recipt\n");
-            Menu.CenterTxt($"You had a {vehicle.GetType().Name} parked at Prague Parking\n");
-            Menu.CenterTxt($"With plate number: {vehicle.LicensePlate}\n");
-            Menu.CenterTxt($"It was parked: {vehicle.TimeParked:g}\n");
-            Menu.CenterTxt($"It has been parked here for: {duration.Days} days {duration.Hours} hours and {duration.Minutes} minutes\n\n");
-            Menu.CenterTxt("Cost: ");
-            Menu.CenterTxt($"{price} CZK");
-            Console.WriteLine();
-            Menu.CenterTxt("Press any key to print recipt to customer...");
-            Console.CursorVisible = false;
-            Console.ReadKey();
-            Console.CursorVisible = true;
+
+            //TODO print search to menu row
         }
     }
 }
