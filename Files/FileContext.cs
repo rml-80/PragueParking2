@@ -115,6 +115,7 @@ namespace PragueParking2
             _ = JsonConvert.DeserializeObject<Config>(jsonData);
         }
         //read price file, wanted a simple file format for price, so that the users can't change config
+        //TODO needs to be reloadable, need to get prices in a better way
         public double GetPrice(Vehicle vehicleType)
         {
             string[] temp = File.ReadAllLines(pathPriceFile);

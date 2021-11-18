@@ -26,7 +26,6 @@ namespace PragueParking2
         }
         public Vehicle()
         { }
-
         public void PrintVehicleInfo(int space, Vehicle vehicle)
         {
             TimeSpan duration = CarPark.ReturnDurationAndPrice(vehicle, out double price);
@@ -54,6 +53,7 @@ namespace PragueParking2
         {
             string pattern = "^[A-Z0-9]{4,10}$";
             bool valid = (Regex.IsMatch(numberPlate, pattern)) ? true : false;
+            Console.SetCursorPosition(0, 28);
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine((valid == false) ? "Invalid number plate..." : ""); ;
             Console.ResetColor();

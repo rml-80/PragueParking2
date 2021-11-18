@@ -17,7 +17,7 @@ namespace PragueParking2
         public MC(Vehicle vehicle) : base(vehicle)
         {
             Size = Config.CarSize;
-            type = "CAR";
+            type = "MC";
         }
     }
 }
