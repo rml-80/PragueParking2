@@ -22,12 +22,13 @@ namespace PragueParking2
             if (!parkingSpaces.Count.Equals(Size))
             {
                 int cols = 4;
-                for (int i = 0; i < Size/cols; i++)
+                double rows = (double)Size / cols;
+                for (int i = 0; i < Math.Ceiling(rows); i++)
                 {
-                    int k = i + 1;
-                    for (int j = 0; j < cols; j++, k += 25)
+                    double k = i + 1;
+                    for (int j = 0; j < cols; j++, k += rows)
                     {
-                        parkingSpaces.Add(new ParkingSpace(k, Config.SpaceSize));
+                        parkingSpaces.Add(new ParkingSpace((int)k, Config.SpaceSize));
                     }
                 }
             }
@@ -80,18 +81,11 @@ namespace PragueParking2
                 }
             }
         }
-        /// <summary>
-        /// validate license plate, more than 4 chars and not more than 10 chars and dosen't contain special chars
-        /// </summary>
-        /// <param name="numberPlate">Which plate to check</param>
-        /// <returns>
-        /// bool
-        /// </returns>
         public bool ValidateLicensePlate(string numberPlate)
         {
             string pattern = "^[A-Z0-9]{4,10}$";
             bool valid = (Regex.IsMatch(numberPlate, pattern)) ? true : false;
-            Console.SetCursorPosition(0, 28);
+            Console.SetCursorPosition(0, Console.WindowHeight - 2);
             Console.ForegroundColor = WarningColor;
             Console.WriteLine((valid == false) ? "Invalid number plate..." : ""); ;
             Console.ResetColor();
@@ -113,8 +107,8 @@ namespace PragueParking2
                 bool inputOk = int.TryParse(Console.ReadLine(), out int choice);
                 if (inputOk)
                 {
-                    Menu.ClearRow(28);
-                    Menu.ClearRow(29);
+                    Menu.ClearRow(Console.WindowHeight - 2);
+                    Menu.ClearRow(Console.WindowHeight - 1);
                     bool validNumberPlate;
                     do
                     {
@@ -150,24 +144,19 @@ namespace PragueParking2
             }
             return true;
         }
-        /// <summary>
-        /// Finds the first parking space with enough available space for vehicle
-        /// </summary>
-        /// <param name="size"></param>
-        /// <returns>
-        /// int spacenumber
-        /// </returns>
-        public int FindSpace(int size)      //TODO check if mc stands alone
+        public int FindSpace(int size)
         {
+            int emptyspace = 0;
             for (int spaceNumber = 1; spaceNumber <= parkingSpaces.Count; spaceNumber++)
             {
                 int spaceIndex = GetIndex(spaceNumber);
                 if (parkingSpaces[spaceIndex].AvailableSpace >= size)
                 {
-                    return spaceIndex;
+                    if (parkingSpaces[spaceIndex].AvailableSpace == size) return spaceIndex;
+                    if (emptyspace == 0) emptyspace = spaceIndex;
                 }
             }
-            return -1;
+            return emptyspace;
         }
         /// <summary>
         /// Search for a specific vehicle
@@ -202,9 +191,9 @@ namespace PragueParking2
                         }
                     }
                 }
-                Console.SetCursorPosition(0, 28);
+                Console.SetCursorPosition(0, Console.WindowHeight - 1);
                 Console.ForegroundColor = WarningColor;
-                Console.WriteLine("No vehicle parked here with that license plate!");
+                Console.Write("No vehicle parked here with that license plate!");
                 Console.ResetColor();
             }
             return null;
@@ -217,7 +206,7 @@ namespace PragueParking2
         /// </returns>
         private static string EnterNumberPlate()
         {
-            Menu.ClearRow(26);
+            Menu.ClearRow(Console.WindowHeight - 4);
             Console.Write("Enter license plate: ");
             string licensePlate = Console.ReadLine().ToUpper();
             return licensePlate;
@@ -266,7 +255,7 @@ namespace PragueParking2
             else
             {
                 //Get the index of spacenumber x
-                idx = GetIndex((int)spaceNumber); 
+                idx = GetIndex((int)spaceNumber);
             }
             if (idx != -1)
             {
@@ -327,9 +316,9 @@ namespace PragueParking2
             {
                 while (true)
                 {
-                    Console.SetCursorPosition(35, 26);
+                    Console.SetCursorPosition(35, Console.WindowHeight - 4);
                     Console.Write("                          ");
-                    Console.SetCursorPosition(35, 26);
+                    Console.SetCursorPosition(35, Console.WindowHeight - 4);
 
                     Console.Write("Move to: ");
                     bool inputOK = int.TryParse(Console.ReadLine(), out int newSpace);
@@ -344,7 +333,7 @@ namespace PragueParking2
                         }
                         else
                         {
-                            Console.SetCursorPosition(0, 28);
+                            Console.SetCursorPosition(0, Console.WindowHeight - 2);
                             Console.ForegroundColor = WarningColor;
                             Console.WriteLine("Space occupied.");
                             Console.ResetColor();
@@ -352,7 +341,7 @@ namespace PragueParking2
                     }
                     else
                     {
-                        Console.SetCursorPosition(0, 28);
+                        Console.SetCursorPosition(0, Console.WindowHeight - 2);
                         Console.ForegroundColor = WarningColor;
                         Console.WriteLine("Input type was wrong.");
                         Console.ResetColor();
@@ -374,7 +363,6 @@ namespace PragueParking2
         {
             return parkingSpaces.FindIndex(s => s.SpaceNumber == Space);
         }
-
         /// <summary>
         /// Outputs ticket to console
         /// </summary>

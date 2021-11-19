@@ -1,5 +1,5 @@
 {
-  "NumberOfSpaces": 100,
+  "NumberOfSpaces": 100, // if this is changed the output of the parking space isn't working 
   "SpaceSize": 4,
   "CarSize": 4,
   "MCSize": 2,

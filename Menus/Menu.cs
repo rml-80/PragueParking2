@@ -12,8 +12,6 @@ namespace PragueParking2.Menus
         /// <summary>
         /// Main menu for the application
         /// Returns here until application is closed
-        /// </summary>
-        /// <param name="FC"></param>
         public void MainMenu(FileContext FC)
         {
             CarPark CP = new();
@@ -24,9 +22,7 @@ namespace PragueParking2.Menus
                 Console.Clear();
                 CP.PrintCarPark();
                 Console.WriteLine();
-                PrintLineForMenu();
-                Console.WriteLine("{0,-15}{1,-15}{2,-15}{3,-15}{4,-15}{5, -15}{6, 29}", "1. Park", "2. Retrive", "3. Move", "4. Search", "5. Pricelist", "9. Options", "0. Close application");
-                PrintLineForMenu();
+                PrintMenu();
 
                 Console.Write("Choice: ");
                 bool inputOK = int.TryParse(Console.ReadLine(), out int choice);
@@ -39,7 +35,7 @@ namespace PragueParking2.Menus
                             Console.Clear();
                             break;
                         case 1:
-                            ClearRow(26);
+                            ClearRow(Console.WindowHeight - 4);
                             CP.CreateNewVehicle();
                             break;
                         case 2:
@@ -56,7 +52,7 @@ namespace PragueParking2.Menus
                             ShowPrices(FC);
                             break;
                         case 9:
-                            OptionsMenu(CP,FC);
+                            OptionsMenu(CP, FC);
                             break;
                         default:
                             break;
@@ -64,6 +60,14 @@ namespace PragueParking2.Menus
                 }
             } while (loop);
         }
+        private void PrintMenu()
+        {
+            Console.SetCursorPosition(0,Console.WindowHeight - 5);
+            PrintLineForMenu();
+            Console.WriteLine("{0,-15}{1,-15}{2,-15}{3,-15}{4,-15}{5, -15}{6, 29}", "1. Park", "2. Retrive", "3. Move", "4. Search", "5. Pricelist", "9. Options", "0. Close application");
+            PrintLineForMenu();
+        }
+        //TODO SetCursorPositon Window Height - 4
         /// <summary>
         /// Output the prices to console
         /// </summary>
@@ -91,7 +95,7 @@ namespace PragueParking2.Menus
         /// <param name="FC">instance of FileContext for access to methods</param>
         private void OptionsMenu(CarPark CP, FileContext FC)
         {
-            ClearRow(26);
+            ClearRow(Console.WindowHeight - 4);
             Console.Write($"1. Change prices\t2. Remove all vehicles");
             ClearChoice();
             bool inputOK = int.TryParse(Console.ReadLine(), out int choice);
@@ -115,6 +119,8 @@ namespace PragueParking2.Menus
         /// </summary>
         public static void SubMenu()
         {
+            Console.SetCursorPosition(0, Console.WindowHeight - 4);
+
             for (int i = 0; i < Config.VehicleTypes.Length; i++)
             {
                 Console.Write($"{i + 1}. {Config.VehicleTypes[i]}\t");
@@ -126,9 +132,9 @@ namespace PragueParking2.Menus
         /// </summary>
         public static void ClearChoice()
         {
-            Console.SetCursorPosition(8, 28);
+            Console.SetCursorPosition(8, Console.WindowHeight - 2);
             Console.Write("       ");
-            Console.SetCursorPosition(8, 28);
+            Console.SetCursorPosition(8, Console.WindowHeight - 2);
         }
         /// <summary>
         /// Prints a line across the window

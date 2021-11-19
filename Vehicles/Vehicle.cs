@@ -22,13 +22,17 @@ namespace PragueParking2
         /// <summary>
         /// Outputs information about vehicle, also used for recipes at the moment
         /// </summary>
-        /// <param name="space">Which space the vehicle is parked</param>
+        /// <param name="spaceNumber">Which space the vehicle is parked</param>
         /// <param name="vehicle">Which vehicle to print info about</param>
-        public void PrintVehicleInfo(int space, Vehicle vehicle)
+        public void PrintVehicleInfo(int spaceNumber, Vehicle vehicle)
         {
             TimeSpan duration = CarPark.CalculateDuration(vehicle.TimeParked);
             double price = CarPark.CalculatePrice(vehicle);
-
+            Menu.ClearRow(Console.WindowHeight - 4);
+            Console.Write($"Vehicle is parked on space: {spaceNumber}. It was parked: {vehicle.TimeParked:g} Cost so far: {price} CZK");
+            Console.SetCursorPosition(0, Console.WindowHeight - 2);
+            Console.Write("Press any key to continue.");
+            Console.ReadKey();
             //TODO print search to menu row
         }
     }
