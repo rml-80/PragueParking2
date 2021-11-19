@@ -146,17 +146,17 @@ namespace PragueParking2
         }
         public int FindSpace(int size)
         {
-            int emptyspace = 0;
+            int? emptyspace = null;
             for (int spaceNumber = 1; spaceNumber <= parkingSpaces.Count; spaceNumber++)
             {
                 int spaceIndex = GetIndex(spaceNumber);
                 if (parkingSpaces[spaceIndex].AvailableSpace >= size)
                 {
-                    if (parkingSpaces[spaceIndex].AvailableSpace == size) return spaceIndex;
-                    if (emptyspace == 0) emptyspace = spaceIndex;
+                    if (parkingSpaces[spaceIndex].AvailableSpace == size) return spaceIndex;    //park mc on a space with mc
+                    if (emptyspace == null) emptyspace = spaceIndex;    //set the first space with enough available space if not finding another for a mc.
                 }
             }
-            return emptyspace;
+            return (int)emptyspace;
         }
         /// <summary>
         /// Search for a specific vehicle
