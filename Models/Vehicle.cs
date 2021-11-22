@@ -33,7 +33,7 @@ namespace PragueParking2
             Console.SetCursorPosition(0, Console.WindowHeight - 2);
             Console.Write("Press any key to continue.");
             Console.ReadKey();
-            //TODO print search to menu row
+
         }
     }
 }

@@ -63,7 +63,7 @@ namespace PragueParking2.Menus
             Console.WriteLine("{0,-15}{1,-15}{2,-15}{3,-15}{4,-15}{5, -15}{6, 29}", "1. Park", "2. Retrive", "3. Move", "4. Search", "5. Pricelist", "9. Options", "0. Close application");
             PrintLineForMenu();
         }
-        //TODO SetCursorPositon Window Height - 4
+
         /// <summary>
         /// Output the prices to console
         /// </summary>

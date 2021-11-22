@@ -394,7 +394,6 @@ namespace PragueParking2
             double price = CarPark.CalculatePrice(vehicle);
             Console.Clear();
             Console.SetCursorPosition(0, Console.WindowHeight / 2 - 8);
-            //TODO make a nicer output
             Menu.CenterTxt("Recipt\n");
             Menu.CenterTxt($"You had a {vehicle.GetType().Name} parked at Prague Parking\n");
             Menu.CenterTxt($"With plate number: {vehicle.LicensePlate}\n");
